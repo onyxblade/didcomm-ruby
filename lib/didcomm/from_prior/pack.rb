@@ -84,8 +84,16 @@ module DIDComm
         raise MalformedMessageError.new(:invalid_signature, "from_prior signature verification failed")
       end
 
-      # Decode payload
+      # Decode payload and validate iss matches kid's DID
       payload = JSON.parse(Crypto::KeyUtils.base64url_decode(parts[1]).force_encoding("UTF-8"))
+
+      iss = payload["iss"]
+      kid_did = issuer_kid.split("#").first
+      if iss && kid_did != iss
+        raise MalformedMessageError.new(:invalid_plaintext,
+          "from_prior kid DID (#{kid_did}) does not match iss (#{iss})")
+      end
+
       message["from_prior"] = payload
 
       issuer_kid
