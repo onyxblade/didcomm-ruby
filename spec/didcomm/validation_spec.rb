@@ -202,6 +202,26 @@ RSpec.describe "Input validation" do
       }.to raise_error(DIDComm::ValueError, /iss is not a valid DID/)
     end
 
+    it "raises when from_prior iss is a DID URL with fragment" do
+      msg_hash = {
+        "id" => "test", "type" => "test", "body" => {},
+        "from_prior" => { "iss" => "did:example:charlie#key-1", "sub" => "did:example:alice" }
+      }
+      expect {
+        DIDComm::FromPriorModule.pack_from_prior(msg_hash, resolvers_charlie)
+      }.to raise_error(DIDComm::ValueError, /iss must be a DID, not a DID URL/)
+    end
+
+    it "raises when from_prior sub is a DID URL with fragment" do
+      msg_hash = {
+        "id" => "test", "type" => "test", "body" => {},
+        "from_prior" => { "iss" => "did:example:charlie", "sub" => "did:example:alice#key-1" }
+      }
+      expect {
+        DIDComm::FromPriorModule.pack_from_prior(msg_hash, resolvers_charlie)
+      }.to raise_error(DIDComm::ValueError, /sub must be a DID, not a DID URL/)
+    end
+
     it "raises when from_prior sub is not a valid DID" do
       msg_hash = {
         "id" => "test", "type" => "test", "body" => {},
@@ -408,6 +428,32 @@ RSpec.describe "Input validation" do
       expect {
         DIDComm.pack_encrypted(message, to: "did:example:bob", resolvers_config: bad_resolvers)
       }.to raise_error(DIDComm::DIDDocNotResolvedError)
+    end
+  end
+
+  describe "service_metadata from recipient service" do
+    it "returns service_metadata from the recipient's DID doc, not routing key's" do
+      bob_with_service = TestVectors.bob_did_doc
+      bob_with_service.service = [
+        DIDComm::DIDCommService.new(
+          id: "did:example:bob#didcomm-1",
+          service_endpoint: "https://bob-mediator.example.com/inbox",
+          routing_keys: ["did:example:bob#key-x25519-1"],
+          accept: ["didcomm/v2"]
+        )
+      ]
+
+      routed_resolvers = DIDComm::ResolversConfig.new(
+        did_resolver: DIDComm::DIDResolverInMemory.new([
+          TestVectors.alice_did_doc, bob_with_service, TestVectors.charlie_did_doc
+        ]),
+        secrets_resolver: DIDComm::SecretsResolverInMemory.new(TestVectors.alice_secrets)
+      )
+
+      result = DIDComm.pack_encrypted(message, to: "did:example:bob", resolvers_config: routed_resolvers)
+      expect(result.service_metadata).not_to be_nil
+      expect(result.service_metadata.id).to eq("did:example:bob#didcomm-1")
+      expect(result.service_metadata.service_endpoint).to eq("https://bob-mediator.example.com/inbox")
     end
   end
 end

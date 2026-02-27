@@ -12,9 +12,13 @@ module DIDComm
         raise MalformedMessageError.new(:invalid_plaintext, "from_prior plaintext is invalid")
       end
 
-      # Validate
-      raise ValueError, "from_prior iss is not a valid DID" unless DIDUtils.is_did(from_prior["iss"])
-      raise ValueError, "from_prior sub is not a valid DID" unless DIDUtils.is_did(from_prior["sub"])
+      # Validate — iss and sub must be bare DIDs (no fragment)
+      iss = from_prior["iss"]
+      sub = from_prior["sub"]
+      raise ValueError, "from_prior iss is not a valid DID" unless DIDUtils.is_did(iss)
+      raise ValueError, "from_prior iss must be a DID, not a DID URL" if DIDUtils.is_did_url(iss)
+      raise ValueError, "from_prior sub is not a valid DID" unless DIDUtils.is_did(sub)
+      raise ValueError, "from_prior sub must be a DID, not a DID URL" if DIDUtils.is_did_url(sub)
       if issuer_kid && DIDUtils.did_from_did_url(issuer_kid) != from_prior["iss"]
         raise ValueError, "issuer_kid does not belong to from_prior iss"
       end

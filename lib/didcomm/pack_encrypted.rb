@@ -101,9 +101,14 @@ module DIDComm
     routing_keys = service.routing_keys
     return nil if routing_keys.nil? || routing_keys.empty?
 
-    Protocols::Routing::Forward.wrap_in_forward(
+    fwd_result = Protocols::Routing::Forward.wrap_in_forward(
       packed_msg_hash, to, routing_keys, pack_config.enc_alg_anon, resolvers_config
     )
+
+    {
+      msg: fwd_result[:msg],
+      service_metadata: ServiceMetadata.new(id: service.id, service_endpoint: service.service_endpoint)
+    }
   end
 
   private_class_method def self.validate_header_consistency!(msg_hash, to, from)

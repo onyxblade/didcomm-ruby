@@ -45,16 +45,7 @@ module DIDComm
             current_msg = encrypt_result[:msg]
           end
 
-          # Resolve service metadata for the first routing key's DID
-          did, _kid = DIDUtils.did_or_url(routing_keys.first)
-          did_doc = resolvers_config.did_resolver.resolve(did)
-          service = did_doc&.get_didcomm_service
-
-          service_metadata = if service
-                               ServiceMetadata.new(id: service.id, service_endpoint: service.service_endpoint)
-                             end
-
-          { msg: current_msg, service_metadata: service_metadata }
+          { msg: current_msg }
         end
 
         def self.build_forward(next_target, inner_msg)
