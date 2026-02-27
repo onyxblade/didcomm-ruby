@@ -91,8 +91,46 @@ module DIDComm
       metadata.from_prior_issuer_kid = from_prior_result
     end
 
+    verify_message_consistency(msg_hash, metadata)
+
     message = Message.from_hash(msg_hash)
 
     UnpackResult.new(message: message, metadata: metadata)
+  end
+
+  private_class_method def self.verify_message_consistency(msg_hash, metadata)
+    msg_from = msg_hash["from"]
+    msg_to = msg_hash["to"]
+
+    # authcrypt from consistency
+    if metadata.encrypted_from && msg_from
+      encrypted_from_did = metadata.encrypted_from.split("#").first
+      msg_from_did = msg_from.split("#").first
+      unless encrypted_from_did == msg_from_did
+        raise MalformedMessageError.new(:invalid_message,
+          "Mismatch between encrypted_from DID (#{encrypted_from_did}) and message from DID (#{msg_from_did})")
+      end
+    end
+
+    # encrypted_to consistency
+    if metadata.encrypted_to && msg_to.is_a?(Array)
+      metadata.encrypted_to.each do |kid|
+        kid_did = kid.split("#").first
+        unless msg_to.include?(kid_did)
+          raise MalformedMessageError.new(:invalid_message,
+            "encrypted_to kid DID (#{kid_did}) not found in message to list")
+        end
+      end
+    end
+
+    # sign_from consistency
+    if metadata.sign_from && msg_from
+      sign_from_did = metadata.sign_from.split("#").first
+      msg_from_did = msg_from.split("#").first
+      unless sign_from_did == msg_from_did
+        raise MalformedMessageError.new(:invalid_message,
+          "Mismatch between sign_from DID (#{sign_from_did}) and message from DID (#{msg_from_did})")
+      end
+    end
   end
 end

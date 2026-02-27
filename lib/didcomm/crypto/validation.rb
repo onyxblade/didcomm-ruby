@@ -15,6 +15,8 @@ module DIDComm
         raise MalformedMessageError.new(:invalid_message, "Missing kid in signature header") unless sig["header"]["kid"]
       end
 
+      ANONCRYPT_ENC_ALGORITHMS = %w[A256CBC-HS512 A256GCM XC20P].freeze
+
       def self.validate_anoncrypt_jwe(msg)
         recipients = msg["recipients"]
         raise MalformedMessageError.new(:invalid_message, "Missing recipients") unless recipients.is_a?(Array) && !recipients.empty?
@@ -24,6 +26,11 @@ module DIDComm
         end
 
         protected_header = parse_protected(msg["protected"])
+
+        enc = protected_header["enc"]
+        unless ANONCRYPT_ENC_ALGORITHMS.include?(enc)
+          raise MalformedMessageError.new(:invalid_message, "Unsupported enc algorithm for anoncrypt: #{enc}")
+        end
 
         kids = recipients.map { |r| r["header"]["kid"] }
         check_apv(protected_header, kids)
@@ -59,6 +66,11 @@ module DIDComm
         skid = protected_header["skid"]
         if skid && skid != apu_str
           raise MalformedMessageError.new(:invalid_message, "skid does not match apu")
+        end
+
+        enc = protected_header["enc"]
+        unless enc == "A256CBC-HS512"
+          raise MalformedMessageError.new(:invalid_message, "Unsupported enc algorithm for authcrypt: #{enc}")
         end
 
         kids = recipients.map { |r| r["header"]["kid"] }
