@@ -15,6 +15,11 @@ This project was developed with the assistance of Claude and GPT, referencing th
 - **From Prior** — DID rotation via `from_prior` JWT
 - **Pluggable Resolvers** — bring your own DID resolver and secrets resolver
 
+## Requirements
+
+- Ruby >= 4.0 (requires OpenSSL with AES-256-wrap support)
+- libsodium
+
 ## Installation
 
 ```ruby
