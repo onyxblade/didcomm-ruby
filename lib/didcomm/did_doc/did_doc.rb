@@ -43,7 +43,7 @@ module DIDComm
       if service_id
         @service.find { |s| s.id == service_id }
       else
-        @service.find { |s| s.type == "DIDCommMessaging" }
+        @service.find { |s| s.type == "DIDCommMessaging" && (s.accept.empty? || s.accept.include?("didcomm/v2")) }
       end
     end
 

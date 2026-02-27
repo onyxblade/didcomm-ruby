@@ -10,6 +10,11 @@ module DIDComm
       return nil unless from_prior.is_a?(Hash)
 
       # Validate
+      raise ValueError, "from_prior iss is not a valid DID" unless DIDUtils.is_did(from_prior["iss"])
+      raise ValueError, "from_prior sub is not a valid DID" unless DIDUtils.is_did(from_prior["sub"])
+      if issuer_kid && DIDUtils.did_from_did_url(issuer_kid) != from_prior["iss"]
+        raise ValueError, "issuer_kid does not belong to from_prior iss"
+      end
       raise ValueError, "from_prior iss must differ from sub" if from_prior["iss"] == from_prior["sub"]
 
       if message["from"] && from_prior["sub"] != message["from"]
@@ -49,8 +54,16 @@ module DIDComm
 
       # Extract kid from header
       header = JSON.parse(Crypto::KeyUtils.base64url_decode(parts[0]).force_encoding("UTF-8"))
+
+      # Validate typ
+      typ = header["typ"]
+      raise MalformedMessageError.new(:invalid_plaintext, "from_prior typ is not JWT") if typ && typ != "JWT"
+
       issuer_kid = header["kid"]
       raise MalformedMessageError.new(:invalid_plaintext, "Missing kid in from_prior header") unless issuer_kid
+
+      # Validate kid is DID URL with fragment
+      raise MalformedMessageError.new(:invalid_plaintext, "from_prior kid is not a valid DID URL") unless DIDUtils.is_did_url(issuer_kid)
 
       # Verify signature
       vm = Keys::SignKeysSelector.find_verification_key(issuer_kid, resolvers_config)

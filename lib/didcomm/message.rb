@@ -27,7 +27,7 @@ module DIDComm
       @from_prior = from_prior
       @please_ack = please_ack
       @ack = ack
-      @thid = thid || @id
+      @thid = thid
       @pthid = pthid
       @attachments = attachments
       @custom_headers = custom_headers
@@ -77,7 +77,7 @@ module DIDComm
       d = d.dup
 
       typ = d.delete("typ")
-      if typ && typ != DIDCommMessageTypes::PLAINTEXT
+      if typ && typ != DIDCommMessageTypes::PLAINTEXT && typ != DIDCommMessageTypes::PLAINTEXT_SHORT
         raise MalformedMessageError.new(:invalid_plaintext, "Invalid typ: #{typ}")
       end
 

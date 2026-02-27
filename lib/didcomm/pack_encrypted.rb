@@ -21,6 +21,15 @@ module DIDComm
                            resolvers_config:, pack_config: nil)
     pack_config ||= PackEncryptedConfig.new
 
+    # Validate inputs
+    raise ValueError, "'to' is not a valid DID or DID URL" unless DIDUtils.is_did(to)
+    if from
+      raise ValueError, "'from' is not a valid DID or DID URL" unless DIDUtils.is_did(from)
+    end
+    if sign_from
+      raise ValueError, "'sign_from' is not a valid DID or DID URL" unless DIDUtils.is_did(sign_from)
+    end
+
     msg_hash = message.is_a?(Message) ? message.to_hash : message
 
     # Pack from_prior
@@ -94,7 +103,7 @@ module DIDComm
     Protocols::Routing::Forward.wrap_in_forward(
       packed_msg_hash, to, routing_keys, pack_config.enc_alg_anon, resolvers_config
     )
-  rescue
+  rescue StandardError
     nil
   end
 end

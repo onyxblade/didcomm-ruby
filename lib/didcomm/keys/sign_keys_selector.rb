@@ -42,9 +42,16 @@ module DIDComm
       end
 
       private_class_method def self.find_signing_key_by_kid(kid, resolvers_config)
+        did = DIDUtils.did_from_did_url(kid)
+        did_doc = resolvers_config.did_resolver.resolve(did)
+        raise DIDDocNotResolvedError.new(did) unless did_doc
+
+        unless did_doc.authentication.include?(kid)
+          raise DIDUrlNotFoundError, "Key ID #{kid} not found in authentication"
+        end
+
         secret = resolvers_config.secrets_resolver.get_key(kid)
         raise SecretNotFoundError, "Secret not found for #{kid}" unless secret
-
         secret
       end
     end

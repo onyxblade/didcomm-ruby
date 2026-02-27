@@ -21,6 +21,7 @@ module DIDComm
                       else
                         frm_did_doc.key_agreement
                       end
+        raise DIDUrlNotFoundError, "No keyAgreement keys for sender #{frm_did}" if sender_kids.empty?
 
         # Get recipient key agreement kids
         recipient_kids = if to_kid
@@ -28,6 +29,7 @@ module DIDComm
                          else
                            to_did_doc.key_agreement
                          end
+        raise DIDUrlNotFoundError, "No keyAgreement keys for recipient #{to_did}" if recipient_kids.empty?
 
         # Find first sender key with a secret and compatible recipients
         sender_secret = nil
@@ -62,6 +64,10 @@ module DIDComm
 
         sender_vm = frm_did_doc.get_verification_method(frm_kid)
         raise DIDUrlNotFoundError, "Sender key #{frm_kid} not found" unless sender_vm
+
+        unless frm_did_doc.key_agreement.include?(frm_kid)
+          raise DIDUrlNotFoundError, "Sender key #{frm_kid} not in key_agreement"
+        end
 
         secret_ids = resolvers_config.secrets_resolver.get_keys(to_kids)
         raise SecretNotFoundError, "No recipient secrets found" if secret_ids.empty?

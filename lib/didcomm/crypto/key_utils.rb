@@ -193,9 +193,17 @@ module DIDComm
               end
 
         if method_or_secret.is_a?(Secret)
-          # Private key: first 32 bytes = d, last 32 bytes = x
-          d_bytes = raw_value[0, 32]
-          x_bytes = raw_value[32, 32]
+          if crv == "X25519" && raw_value.bytesize == 32
+            # X25519: private key only, derive public
+            require "rbnacl"
+            d_bytes = raw_value
+            priv = RbNaCl::PrivateKey.new(d_bytes)
+            x_bytes = priv.public_key.to_bytes
+          else
+            # Ed25519 or 64-byte format: d || x
+            d_bytes = raw_value[0, 32]
+            x_bytes = raw_value[32, 32]
+          end
           {
             type: :okp, crv: crv, kid: kid,
             public_bytes: x_bytes, private_bytes: d_bytes,
@@ -235,8 +243,17 @@ module DIDComm
               end
 
         if method_or_secret.is_a?(Secret)
-          d_bytes = raw_value[0, 32]
-          x_bytes = raw_value[32, 32]
+          if crv == "X25519" && raw_value.bytesize == 32
+            # X25519: private key only, derive public
+            require "rbnacl"
+            d_bytes = raw_value
+            priv = RbNaCl::PrivateKey.new(d_bytes)
+            x_bytes = priv.public_key.to_bytes
+          else
+            # Ed25519 or 64-byte format: d || x
+            d_bytes = raw_value[0, 32]
+            x_bytes = raw_value[32, 32]
+          end
           {
             type: :okp, crv: crv, kid: kid,
             public_bytes: x_bytes, private_bytes: d_bytes,

@@ -11,7 +11,7 @@ module DIDComm
           begin
             protected_header = Validation.parse_protected(msg["protected"])
             protected_header["alg"]&.start_with?("ECDH-ES")
-          rescue
+          rescue StandardError
             false
           end
       end
@@ -21,7 +21,7 @@ module DIDComm
           begin
             protected_header = Validation.parse_protected(msg["protected"])
             protected_header["alg"]&.start_with?("ECDH-1PU")
-          rescue
+          rescue StandardError
             false
           end
       end

@@ -83,8 +83,6 @@ module DIDComm
         KeyUtils.import_jwk(epk_jwk)
       end
 
-      private
-
       def self.generate_x25519_ephemeral
         require "rbnacl"
         private_key = RbNaCl::PrivateKey.generate
@@ -112,9 +110,8 @@ module DIDComm
 
       def self.compute_x25519(private_key_info, public_key_info)
         require "rbnacl"
-        priv = RbNaCl::PrivateKey.new(private_key_info[:private_bytes])
-        pub = RbNaCl::PublicKey.new(public_key_info[:public_bytes])
-        RbNaCl::GroupElement.new(pub).mult(priv).to_bytes
+        RbNaCl::GroupElement.new(public_key_info[:public_bytes])
+          .mult(private_key_info[:private_bytes]).to_bytes
       end
 
       def self.compute_ec(private_key_info, public_key_info)
@@ -124,6 +121,8 @@ module DIDComm
         # Use OpenSSL ECDH
         private_ec.derive(public_ec)
       end
+
+      private_class_method :generate_x25519_ephemeral, :generate_ec_ephemeral, :compute_x25519, :compute_ec
     end
   end
 end

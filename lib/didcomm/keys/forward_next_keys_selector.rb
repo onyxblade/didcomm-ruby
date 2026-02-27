@@ -14,7 +14,7 @@ module DIDComm
 
         secret_ids = resolvers_config.secrets_resolver.get_keys(kids)
         !secret_ids.empty?
-      rescue
+      rescue StandardError
         false
       end
     end

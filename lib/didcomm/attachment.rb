@@ -4,64 +4,79 @@ require "securerandom"
 
 module DIDComm
   class AttachmentDataLinks
-    attr_accessor :links, :hash, :jws
+    attr_accessor :links, :jws
+    attr_writer :data_hash
 
-    def initialize(links:, hash:, jws: nil)
+    def initialize(links:, data_hash:, jws: nil)
       @links = links
-      @hash = hash
+      @data_hash = data_hash
       @jws = jws
     end
 
+    def data_hash
+      @data_hash
+    end
+
     def to_hash
-      d = { "links" => @links, "hash" => @hash }
+      d = { "links" => @links, "hash" => @data_hash }
       d["jws"] = @jws if @jws
       d
     end
 
     def self.from_hash(d)
-      new(links: d["links"], hash: d["hash"], jws: d["jws"])
+      new(links: d["links"], data_hash: d["hash"], jws: d["jws"])
     end
   end
 
   class AttachmentDataBase64
-    attr_accessor :base64, :hash, :jws
+    attr_accessor :base64, :jws
+    attr_writer :data_hash
 
-    def initialize(base64:, hash: nil, jws: nil)
+    def initialize(base64:, data_hash: nil, jws: nil)
       @base64 = base64
-      @hash = hash
+      @data_hash = data_hash
       @jws = jws
+    end
+
+    def data_hash
+      @data_hash
     end
 
     def to_hash
       d = { "base64" => @base64 }
-      d["hash"] = @hash if @hash
+      d["hash"] = @data_hash if @data_hash
       d["jws"] = @jws if @jws
       d
     end
 
     def self.from_hash(d)
-      new(base64: d["base64"], hash: d["hash"], jws: d["jws"])
+      new(base64: d["base64"], data_hash: d["hash"], jws: d["jws"])
     end
   end
 
   class AttachmentDataJson
-    attr_accessor :json, :hash, :jws
+    attr_accessor :json, :jws
+    attr_writer :data_hash
 
-    def initialize(json:, hash: nil, jws: nil)
+    def initialize(json:, data_hash: nil, jws: nil)
       @json = json
-      @hash = hash
+      @data_hash = data_hash
       @jws = jws
+    end
+
+    def data_hash
+      @data_hash
     end
 
     def to_hash
       d = { "json" => @json }
-      d["hash"] = @hash if @hash
+      d["hash"] = @data_hash if @data_hash
       d["jws"] = @jws if @jws
       d
     end
 
     def self.from_hash(d)
-      new(json: d["json"], hash: d["hash"], jws: d["jws"])
+      new(json: d["json"], data_hash: d["hash"], jws: d["jws"])
     end
   end
 

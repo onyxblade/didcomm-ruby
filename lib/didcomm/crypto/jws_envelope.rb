@@ -15,7 +15,7 @@ module DIDComm
       # Returns a Hash with payload, signatures
       def self.sign(payload_bytes, key_info, kid, alg)
         protected_header = {
-          "typ" => DIDCommMessageTypes::PLAINTEXT,
+          "typ" => DIDCommMessageTypes::SIGNED,
           "alg" => alg
         }
 

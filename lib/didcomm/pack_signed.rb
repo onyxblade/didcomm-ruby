@@ -6,6 +6,8 @@ module DIDComm
   PackSignedResult = Struct.new(:packed_msg, :sign_from_kid, :from_prior_issuer_kid, keyword_init: true)
 
   def self.pack_signed(message, sign_from:, resolvers_config:)
+    raise ValueError, "'sign_from' is not a valid DID or DID URL" unless DIDUtils.is_did(sign_from)
+
     msg_hash = message.is_a?(Message) ? message.to_hash : message
 
     # from_prior packing

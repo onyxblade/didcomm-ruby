@@ -32,17 +32,17 @@ module DIDComm
         end
 
         def self.wrap_in_forward(packed_msg, to, routing_keys, enc_alg_anon, resolvers_config)
+          # Build pairs: (encrypt_to, forward_next) by reversing
+          tos = routing_keys.reverse
+          nexts = (routing_keys[1..] + [to]).reverse
+
           current_msg = packed_msg
-          current_to = to
-
-          routing_keys.each do |routing_key|
-            forward_msg = build_forward(current_to, current_msg)
-
+          tos.zip(nexts).each do |encrypt_to, forward_next|
+            forward_msg = build_forward(forward_next, current_msg)
             encrypt_result = Crypto::Anoncrypt.pack(
-              forward_msg, routing_key, enc_alg_anon, resolvers_config
+              forward_msg, encrypt_to, enc_alg_anon, resolvers_config
             )
             current_msg = encrypt_result[:msg]
-            current_to = routing_key
           end
 
           # Resolve service metadata for the first routing key's DID

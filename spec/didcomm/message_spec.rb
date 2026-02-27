@@ -35,9 +35,22 @@ RSpec.describe DIDComm::Message do
       expect(msg.id).to match(/\A[0-9a-f-]+\z/)
     end
 
-    it "defaults thid to id" do
+    it "does not default thid to id" do
       msg = DIDComm::Message.new(id: "my-id", type: "test", body: {})
-      expect(msg.thid).to eq("my-id")
+      expect(msg.thid).to be_nil
+    end
+
+    it "does not serialize thid when nil" do
+      msg = DIDComm::Message.new(id: "my-id", type: "test", body: {})
+      h = msg.to_hash
+      expect(h).not_to have_key("thid")
+    end
+
+    it "preserves explicit thid" do
+      msg = DIDComm::Message.new(id: "my-id", type: "test", body: {}, thid: "thread-1")
+      expect(msg.thid).to eq("thread-1")
+      h = msg.to_hash
+      expect(h["thid"]).to eq("thread-1")
     end
 
     it "omits nil fields" do
@@ -81,6 +94,12 @@ RSpec.describe DIDComm::Message do
     it "raises on invalid typ" do
       h = { "id" => "1", "type" => "t", "body" => {}, "typ" => "wrong" }
       expect { DIDComm::Message.from_hash(h) }.to raise_error(DIDComm::MalformedMessageError)
+    end
+
+    it "accepts short-form plaintext typ" do
+      h = { "id" => "1", "type" => "t", "body" => {}, "typ" => "didcomm-plain+json" }
+      msg = DIDComm::Message.from_hash(h)
+      expect(msg.id).to eq("1")
     end
 
     it "preserves custom headers" do

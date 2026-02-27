@@ -57,6 +57,8 @@ module DIDComm
           cipher.auth_tag = tag
           cipher.auth_data = aad
           cipher.update(ciphertext) + cipher.final
+        rescue OpenSSL::Cipher::CipherError
+          raise MalformedMessageError.new(:can_not_decrypt, "Decryption failed")
         end
       end
 

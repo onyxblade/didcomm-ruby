@@ -1,8 +1,4 @@
 # frozen_string_literal: true
 
-module DIDComm
-  module Crypto
-    DEF_ENC_ALG_AUTH = AuthCryptAlg::A256CBC_HS512_ECDH_1PU_A256KW
-    DEF_ENC_ALG_ANON = AnonCryptAlg::XC20P_ECDH_ES_A256KW
-  end
-end
+# Canonical defaults are defined in DIDComm::Defaults (lib/didcomm/algorithms.rb).
+# This file is kept for backward compatibility but should not be used directly.

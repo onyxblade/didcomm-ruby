@@ -60,4 +60,53 @@ RSpec.describe DIDComm::SecretsResolverInMemory do
     kids = resolver.get_keys(["did:example:alice#key-1", "did:example:alice#key-2", "did:example:unknown#key"])
     expect(kids).to contain_exactly("did:example:alice#key-1", "did:example:alice#key-2")
   end
+
+  it "preserves caller's key order" do
+    kids = resolver.get_keys(["did:example:alice#key-2", "did:example:alice#key-1"])
+    expect(kids).to eq(["did:example:alice#key-2", "did:example:alice#key-1"])
+  end
+end
+
+RSpec.describe "DIDDoc#get_didcomm_service accept filter" do
+  it "returns service with empty accept list" do
+    doc = DIDComm::DIDDoc.new(
+      id: "did:example:test",
+      service: [
+        DIDComm::DIDCommService.new(id: "svc-1", service_endpoint: "http://example.com", accept: [])
+      ]
+    )
+    expect(doc.get_didcomm_service).not_to be_nil
+  end
+
+  it "returns service that accepts didcomm/v2" do
+    doc = DIDComm::DIDDoc.new(
+      id: "did:example:test",
+      service: [
+        DIDComm::DIDCommService.new(id: "svc-1", service_endpoint: "http://example.com", accept: ["didcomm/v2"])
+      ]
+    )
+    expect(doc.get_didcomm_service).not_to be_nil
+  end
+
+  it "rejects service that only accepts didcomm/v1" do
+    doc = DIDComm::DIDDoc.new(
+      id: "did:example:test",
+      service: [
+        DIDComm::DIDCommService.new(id: "svc-1", service_endpoint: "http://example.com", accept: ["didcomm/v1"])
+      ]
+    )
+    expect(doc.get_didcomm_service).to be_nil
+  end
+
+  it "picks the first compatible service" do
+    doc = DIDComm::DIDDoc.new(
+      id: "did:example:test",
+      service: [
+        DIDComm::DIDCommService.new(id: "svc-v1", service_endpoint: "http://v1.example.com", accept: ["didcomm/v1"]),
+        DIDComm::DIDCommService.new(id: "svc-v2", service_endpoint: "http://v2.example.com", accept: ["didcomm/v2"])
+      ]
+    )
+    svc = doc.get_didcomm_service
+    expect(svc.id).to eq("svc-v2")
+  end
 end

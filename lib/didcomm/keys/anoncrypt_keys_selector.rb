@@ -21,6 +21,7 @@ module DIDComm
           raise DIDUrlNotFoundError, "No keyAgreement keys in DID Doc for #{did}" if ka_kids.empty?
 
           first_vm = did_doc.get_verification_method(ka_kids.first)
+          raise DIDUrlNotFoundError, "Verification method #{ka_kids.first} not found" unless first_vm
           ka_kids.filter_map do |ka_kid|
             vm = did_doc.get_verification_method(ka_kid)
             vm if vm && Crypto::KeyUtils.are_keys_compatible?(first_vm, vm)

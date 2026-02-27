@@ -46,6 +46,20 @@ RSpec.describe "Crypto primitives" do
       r2 = DIDComm::Crypto::ConcatKDF.derive(ss, 32, "A256KW", "apu".b, "apv".b)
       expect(r1).to eq(r2)
     end
+
+    it "includes tag in derivation when provided" do
+      ss = "test_secret_value_for_kdf_test!".b
+      without_tag = DIDComm::Crypto::ConcatKDF.derive(ss, 32, "ECDH-1PU+A256KW", "apu".b, "apv".b)
+      with_tag = DIDComm::Crypto::ConcatKDF.derive(ss, 32, "ECDH-1PU+A256KW", "apu".b, "apv".b, tag: "sometag".b)
+      expect(without_tag).not_to eq(with_tag)
+    end
+
+    it "ignores empty tag" do
+      ss = "test_secret_value_for_kdf_test!".b
+      without_tag = DIDComm::Crypto::ConcatKDF.derive(ss, 32, "A256KW", "apu".b, "apv".b)
+      with_empty_tag = DIDComm::Crypto::ConcatKDF.derive(ss, 32, "A256KW", "apu".b, "apv".b, tag: "")
+      expect(without_tag).to eq(with_empty_tag)
+    end
   end
 
   describe DIDComm::Crypto::ContentEncryption do
@@ -74,6 +88,17 @@ RSpec.describe "Crypto primitives" do
           result[:ciphertext], result[:iv], result[:tag], aad, key
         )
         expect(decrypted).to eq(plaintext)
+      end
+
+      it "raises MalformedMessageError on tampered ciphertext" do
+        key = SecureRandom.random_bytes(32)
+        result = DIDComm::Crypto::ContentEncryption::A256GCM.encrypt("test", "aad", key)
+        result[:tag][0] = (result[:tag][0].ord ^ 0xFF).chr
+        expect {
+          DIDComm::Crypto::ContentEncryption::A256GCM.decrypt(
+            result[:ciphertext], result[:iv], result[:tag], "aad", key
+          )
+        }.to raise_error(DIDComm::MalformedMessageError)
       end
     end
 
@@ -142,6 +167,40 @@ RSpec.describe "Crypto primitives" do
         )
       )
       expect(DIDComm::Crypto::KeyUtils.extract_sign_alg(secret_ed)).to eq(DIDComm::SignAlg::ED25519)
+    end
+  end
+
+  describe "Algorithm constants" do
+    it "freezes AnonCryptAlg constants" do
+      expect(DIDComm::AnonCryptAlg::A256CBC_HS512_ECDH_ES_A256KW).to be_frozen
+      expect(DIDComm::AnonCryptAlg::XC20P_ECDH_ES_A256KW).to be_frozen
+      expect(DIDComm::AnonCryptAlg::A256GCM_ECDH_ES_A256KW).to be_frozen
+    end
+
+    it "freezes AuthCryptAlg constants" do
+      expect(DIDComm::AuthCryptAlg::A256CBC_HS512_ECDH_1PU_A256KW).to be_frozen
+    end
+  end
+
+  describe "ECDH private methods" do
+    it "does not expose internal helper methods" do
+      expect { DIDComm::Crypto::ECDH.generate_x25519_ephemeral }.to raise_error(NoMethodError)
+      expect { DIDComm::Crypto::ECDH.generate_ec_ephemeral("prime256v1") }.to raise_error(NoMethodError)
+      expect { DIDComm::Crypto::ECDH.compute_x25519({}, {}) }.to raise_error(NoMethodError)
+      expect { DIDComm::Crypto::ECDH.compute_ec({}, {}) }.to raise_error(NoMethodError)
+    end
+  end
+
+  describe "JWS typ header" do
+    it "uses SIGNED typ in JWS protected header" do
+      secret = TestVectors.alice_secrets.find { |s| s.kid == "did:example:alice#key-1" }
+      key_info = DIDComm::Crypto::KeyUtils.extract_key(secret)
+      alg = DIDComm::Crypto::KeyUtils.extract_sign_alg(secret)
+      jws = DIDComm::Crypto::JWSEnvelope.sign("test payload", key_info, secret.kid, alg)
+
+      protected_json = DIDComm::Crypto::KeyUtils.base64url_decode(jws["signatures"][0]["protected"])
+      protected_header = JSON.parse(protected_json.force_encoding("UTF-8"))
+      expect(protected_header["typ"]).to eq(DIDComm::DIDCommMessageTypes::SIGNED)
     end
   end
 end

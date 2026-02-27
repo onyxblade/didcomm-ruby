@@ -14,7 +14,7 @@ module DIDComm
     end
 
     def get_keys(kids)
-      @secrets.values.select { |s| kids.include?(s.kid) }.map(&:kid)
+      kids.select { |kid| @secrets.key?(kid) }
     end
   end
 end

@@ -20,6 +20,7 @@ module DIDComm
         supp_pub = [key_data_len * 8].pack("N") # key length in bits
 
         other_info = alg_id + apu_info + apv_info + supp_pub
+        other_info += length_prefixed(tag) unless tag.nil? || tag.empty?
 
         hash_len = 32 # SHA-256 output
         reps = (key_data_len.to_f / hash_len).ceil
