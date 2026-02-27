@@ -41,6 +41,36 @@ RSpec.describe "Input validation" do
                                 pack_config: DIDComm::PackEncryptedConfig.new(forward: false))
       }.not_to raise_error
     end
+
+    it "raises when message 'from' does not match 'from' argument DID" do
+      msg = TestVectors.test_message
+      msg.from = "did:example:bob"
+      expect {
+        DIDComm.pack_encrypted(msg, to: "did:example:bob", from: "did:example:alice",
+                                resolvers_config: resolvers_alice,
+                                pack_config: DIDComm::PackEncryptedConfig.new(forward: false))
+      }.to raise_error(DIDComm::ValueError, /message 'from' value/)
+    end
+
+    it "raises when message 'to' does not contain 'to' argument DID" do
+      msg = TestVectors.test_message
+      msg.to = ["did:example:charlie"]
+      expect {
+        DIDComm.pack_encrypted(msg, to: "did:example:bob",
+                                resolvers_config: resolvers_alice,
+                                pack_config: DIDComm::PackEncryptedConfig.new(forward: false))
+      }.to raise_error(DIDComm::ValueError, /message 'to' value/)
+    end
+
+    it "raises when message 'to' header is not a list" do
+      msg_hash = message.to_hash
+      msg_hash["to"] = "did:example:bob"
+      expect {
+        DIDComm.pack_encrypted(msg_hash, to: "did:example:bob",
+                                resolvers_config: resolvers_alice,
+                                pack_config: DIDComm::PackEncryptedConfig.new(forward: false))
+      }.to raise_error(DIDComm::ValueError, /not a list/)
+    end
   end
 
   describe "pack_signed validation" do
@@ -278,6 +308,106 @@ RSpec.describe "Input validation" do
       )
       result = DIDComm.pack_plaintext(msg, resolvers_config: resolvers_alice)
       expect(result.from_prior_issuer_kid).to be_nil
+    end
+  end
+
+  describe "from_prior strictness" do
+    it "raises when from_prior is present but not a Hash" do
+      msg_hash = {
+        "id" => "test", "type" => "test", "body" => {},
+        "from_prior" => "already-a-jwt-string"
+      }
+      expect {
+        DIDComm::FromPriorModule.pack_from_prior(msg_hash, resolvers_alice)
+      }.to raise_error(DIDComm::MalformedMessageError, /from_prior plaintext is invalid/)
+    end
+  end
+
+  describe "decrypt_by_all_keys" do
+    it "succeeds in relaxed mode even if one key cannot decrypt" do
+      pack_result = DIDComm.pack_encrypted(message, to: "did:example:bob",
+                                            resolvers_config: resolvers_alice,
+                                            pack_config: DIDComm::PackEncryptedConfig.new(forward: false))
+
+      bad_bob_secrets = TestVectors.bob_secrets.map do |secret|
+        next secret unless secret.kid == "did:example:bob#key-x25519-2"
+
+        jwk = JSON.parse(secret.verification_material.value)
+        jwk["d"] = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        DIDComm::Secret.new(
+          kid: secret.kid, type: secret.type,
+          verification_material: DIDComm::VerificationMaterial.new(
+            format: secret.verification_material.format,
+            value: JSON.generate(jwk)
+          )
+        )
+      end
+
+      bad_resolvers_bob = DIDComm::ResolversConfig.new(
+        did_resolver: resolvers_bob.did_resolver,
+        secrets_resolver: DIDComm::SecretsResolverInMemory.new(bad_bob_secrets)
+      )
+
+      relaxed = DIDComm.unpack(pack_result.packed_msg, resolvers_config: bad_resolvers_bob)
+      expect(relaxed.message.body).to eq(message.body)
+    end
+
+    it "raises in strict mode when one key cannot decrypt" do
+      pack_result = DIDComm.pack_encrypted(message, to: "did:example:bob",
+                                            resolvers_config: resolvers_alice,
+                                            pack_config: DIDComm::PackEncryptedConfig.new(forward: false))
+
+      bad_bob_secrets = TestVectors.bob_secrets.map do |secret|
+        next secret unless secret.kid == "did:example:bob#key-x25519-2"
+
+        jwk = JSON.parse(secret.verification_material.value)
+        jwk["d"] = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        DIDComm::Secret.new(
+          kid: secret.kid, type: secret.type,
+          verification_material: DIDComm::VerificationMaterial.new(
+            format: secret.verification_material.format,
+            value: JSON.generate(jwk)
+          )
+        )
+      end
+
+      bad_resolvers_bob = DIDComm::ResolversConfig.new(
+        did_resolver: resolvers_bob.did_resolver,
+        secrets_resolver: DIDComm::SecretsResolverInMemory.new(bad_bob_secrets)
+      )
+
+      expect {
+        DIDComm.unpack(
+          pack_result.packed_msg,
+          resolvers_config: bad_resolvers_bob,
+          unpack_config: DIDComm::UnpackConfig.new(expect_decrypt_by_all_keys: true)
+        )
+      }.to raise_error(DIDComm::MalformedMessageError, /Cannot decrypt by all/)
+    end
+  end
+
+  describe "forward error propagation" do
+    it "raises when forward wrapping fails instead of silently skipping" do
+      bob_with_bad_service = TestVectors.bob_did_doc
+      bob_with_bad_service.service = [
+        DIDComm::DIDCommService.new(
+          id: "did:example:bob#didcomm-1",
+          service_endpoint: "https://mediator.example.com/inbox",
+          routing_keys: ["did:example:unknown#key-1"],
+          accept: ["didcomm/v2"]
+        )
+      ]
+
+      bad_resolvers = DIDComm::ResolversConfig.new(
+        did_resolver: DIDComm::DIDResolverInMemory.new([
+          TestVectors.alice_did_doc, bob_with_bad_service, TestVectors.charlie_did_doc
+        ]),
+        secrets_resolver: DIDComm::SecretsResolverInMemory.new(TestVectors.alice_secrets)
+      )
+
+      expect {
+        DIDComm.pack_encrypted(message, to: "did:example:bob", resolvers_config: bad_resolvers)
+      }.to raise_error(DIDComm::DIDDocNotResolvedError)
     end
   end
 end

@@ -40,22 +40,29 @@ module DIDComm
         alg_obj = AnonCryptAlg.by_enc(enc)
 
         last_error = nil
+        unpack_result = nil
         secrets.each do |secret|
           begin
             key_info = KeyUtils.extract_key(secret)
             key_info[:kid] = secret.kid
             plaintext = JWEEnvelope.decrypt_es(msg_hash, key_info)
 
-            return {
+            unpack_result = {
               msg: plaintext.force_encoding("UTF-8"),
               to_kids: to_kids,
               alg: alg_obj
             }
-          rescue => e
+            return unpack_result unless decrypt_by_all_keys
+          rescue StandardError => e
+            if decrypt_by_all_keys
+              raise MalformedMessageError.new(:can_not_decrypt, "Cannot decrypt by all available keys")
+            end
             last_error = e
             next
           end
         end
+
+        return unpack_result if unpack_result
 
         raise last_error || MalformedMessageError.new(:can_not_decrypt, "Cannot decrypt with any available key")
       end

@@ -92,8 +92,10 @@ RSpec.describe "Encryption with various curves" do
 
   describe "Error cases" do
     it "raises on unknown recipient DID" do
+      msg = TestVectors.test_message
+      msg.to = nil
       expect {
-        DIDComm.pack_encrypted(message, to: "did:example:unknown",
+        DIDComm.pack_encrypted(msg, to: "did:example:unknown",
                                 resolvers_config: resolvers_alice,
                                 pack_config: DIDComm::PackEncryptedConfig.new(forward: false))
       }.to raise_error(DIDComm::DIDDocNotResolvedError)

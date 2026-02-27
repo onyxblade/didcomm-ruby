@@ -52,6 +52,7 @@ module DIDComm
         )
 
         last_error = nil
+        unpack_result = nil
         pairs.each do |pair|
           begin
             recipient_key = KeyUtils.extract_key(pair[:recipient_secret])
@@ -62,17 +63,23 @@ module DIDComm
 
             plaintext = JWEEnvelope.decrypt_1pu(msg_hash, recipient_key, sender_key)
 
-            return {
+            unpack_result = {
               msg: plaintext.force_encoding("UTF-8"),
               to_kids: to_kids,
               frm_kid: frm_kid,
               alg: alg_obj
             }
-          rescue => e
+            return unpack_result unless decrypt_by_all_keys
+          rescue StandardError => e
+            if decrypt_by_all_keys
+              raise MalformedMessageError.new(:can_not_decrypt, "Cannot decrypt by all available key pairs")
+            end
             last_error = e
             next
           end
         end
+
+        return unpack_result if unpack_result
 
         raise last_error || MalformedMessageError.new(:can_not_decrypt, "Cannot decrypt with any available key pair")
       end

@@ -7,7 +7,10 @@ module DIDComm
   module FromPriorModule
     def self.pack_from_prior(message, resolvers_config, issuer_kid: nil)
       from_prior = message["from_prior"]
-      return nil unless from_prior.is_a?(Hash)
+      return nil if from_prior.nil?
+      unless from_prior.is_a?(Hash)
+        raise MalformedMessageError.new(:invalid_plaintext, "from_prior plaintext is invalid")
+      end
 
       # Validate
       raise ValueError, "from_prior iss is not a valid DID" unless DIDUtils.is_did(from_prior["iss"])

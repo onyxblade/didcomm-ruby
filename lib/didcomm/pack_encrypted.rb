@@ -31,6 +31,7 @@ module DIDComm
     end
 
     msg_hash = message.is_a?(Message) ? message.to_hash : message
+    validate_header_consistency!(msg_hash, to, from)
 
     # Pack from_prior
     from_prior_issuer_kid = FromPriorModule.pack_from_prior(msg_hash, resolvers_config)
@@ -103,7 +104,25 @@ module DIDComm
     Protocols::Routing::Forward.wrap_in_forward(
       packed_msg_hash, to, routing_keys, pack_config.enc_alg_anon, resolvers_config
     )
-  rescue StandardError
-    nil
+  end
+
+  private_class_method def self.validate_header_consistency!(msg_hash, to, from)
+    message_to = msg_hash["to"] || msg_hash[:to]
+    if !message_to.nil? && !message_to.is_a?(Array)
+      raise ValueError, "message 'to' value is not a list: #{message_to}"
+    end
+
+    to_did, _to_kid = DIDUtils.did_or_url(to)
+    if message_to && !message_to.include?(to_did)
+      raise ValueError, "message 'to' value #{message_to} does not contain 'to' DID #{to_did}"
+    end
+
+    message_from = msg_hash["from"] || msg_hash[:from]
+    if from && message_from
+      from_did, _from_kid = DIDUtils.did_or_url(from)
+      if from_did != message_from
+        raise ValueError, "message 'from' value #{message_from} does not match 'from' DID #{from_did}"
+      end
+    end
   end
 end
