@@ -86,7 +86,7 @@ RSpec.describe "Input validation" do
       # key-x25519-1 is a key_agreement key, not in authentication
       expect {
         DIDComm::Keys::SignKeysSelector.find_signing_key("did:example:alice#key-x25519-1", resolvers_alice)
-      }.to raise_error(DIDComm::DIDUrlNotFoundError, /not found in authentication/)
+      }.to raise_error(DID::UrlNotFoundError, /not found in authentication/)
     end
 
     it "succeeds when kid is in authentication" do
@@ -112,7 +112,7 @@ RSpec.describe "Input validation" do
 
       expect {
         DIDComm::Keys::AnoncryptKeysSelector.find_pack_recipient_public_keys("did:example:bad", config)
-      }.to raise_error(DIDComm::DIDUrlNotFoundError, /Verification method/)
+      }.to raise_error(DID::UrlNotFoundError, /Verification method/)
     end
   end
 
@@ -133,7 +133,7 @@ RSpec.describe "Input validation" do
         DIDComm::Keys::AuthcryptKeysSelector.find_pack_sender_and_recipient_keys(
           "did:example:empty", "did:example:bob", config
         )
-      }.to raise_error(DIDComm::DIDUrlNotFoundError, /No keyAgreement keys for sender/)
+      }.to raise_error(DID::UrlNotFoundError, /No keyAgreement keys for sender/)
     end
 
     it "raises when recipient has no key_agreement keys" do
@@ -152,7 +152,7 @@ RSpec.describe "Input validation" do
         DIDComm::Keys::AuthcryptKeysSelector.find_pack_sender_and_recipient_keys(
           "did:example:alice", "did:example:empty", config
         )
-      }.to raise_error(DIDComm::DIDUrlNotFoundError, /No keyAgreement keys for recipient/)
+      }.to raise_error(DID::UrlNotFoundError, /No keyAgreement keys for recipient/)
     end
 
     it "raises when sender kid is not in key_agreement on unpack" do
@@ -185,7 +185,7 @@ RSpec.describe "Input validation" do
           ["did:example:bob#key-x25519-1"],
           config
         )
-      }.to raise_error(DIDComm::DIDUrlNotFoundError, /not in key_agreement/)
+      }.to raise_error(DID::UrlNotFoundError, /not in key_agreement/)
     end
   end
 
@@ -427,7 +427,7 @@ RSpec.describe "Input validation" do
 
       expect {
         DIDComm.pack_encrypted(message, to: "did:example:bob", resolvers_config: bad_resolvers)
-      }.to raise_error(DIDComm::DIDDocNotResolvedError)
+      }.to raise_error(DID::DocumentNotResolvedError)
     end
   end
 

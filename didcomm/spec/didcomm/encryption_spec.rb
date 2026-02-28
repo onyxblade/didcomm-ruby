@@ -98,7 +98,7 @@ RSpec.describe "Encryption with various curves" do
         DIDComm.pack_encrypted(msg, to: "did:example:unknown",
                                 resolvers_config: resolvers_alice,
                                 pack_config: DIDComm::PackEncryptedConfig.new(forward: false))
-      }.to raise_error(DIDComm::DIDDocNotResolvedError)
+      }.to raise_error(DID::DocumentNotResolvedError)
     end
 
     it "raises on tampered ciphertext" do
