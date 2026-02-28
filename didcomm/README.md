@@ -1,6 +1,6 @@
-# didcomm-ruby
+# DIDComm
 
-Ruby implementation of the [DIDComm v2](https://identity.foundation/didcomm-messaging/spec/v2.1/) messaging protocol.
+Ruby implementation of the [DIDComm v2](https://identity.foundation/didcomm-messaging/spec/v2.1/) messaging protocol. Part of the [DIDWell](../README.md) toolkit.
 
 ## Disclaimer
 
@@ -15,35 +15,24 @@ This project was developed with the assistance of Claude and GPT, referencing th
 - **From Prior** — DID rotation via `from_prior` JWT
 - **Pluggable Resolvers** — bring your own DID resolver and secrets resolver
 
-## Requirements
-
-- Ruby >= 4.0 (requires OpenSSL with AES-256-wrap support)
-- libsodium
-
-## Installation
-
-```ruby
-gem "didcomm"
-```
-
 ## Usage
 
 ```ruby
-require "didcomm"
+require "didwell"
 
-# Implement DIDComm::DIDDoc::DIDResolver and DIDComm::Secrets::SecretsResolver,
+# Implement DID::Resolver and DID::SecretsResolver,
 # or use the provided in-memory variants for testing.
 
-resolver = DIDComm::DIDDoc::DIDResolverInMemory.new(did_docs)
-secrets  = DIDComm::Secrets::SecretsResolverInMemory.new(secrets)
+resolver = DID::ResolverInMemory.new(did_docs)
+secrets  = DID::SecretsResolverInMemory.new(secrets)
+config   = DIDComm::ResolversConfig.new(did_resolver: resolver, secrets_resolver: secrets)
 
 # Pack an encrypted message
-result = DIDComm::PackEncrypted.new(message, to: recipient_did, from: sender_did,
-                                    did_resolver: resolver, secrets_resolver: secrets).pack
+result = DIDComm.pack_encrypted(message, to: recipient_did, from: sender_did,
+                                resolvers_config: config)
 
 # Unpack a received message
-unpack = DIDComm::Unpack.new(result.packed_msg,
-                             did_resolver: resolver, secrets_resolver: secrets).unpack
+unpack = DIDComm.unpack(packed_msg, resolvers_config: config)
 ```
 
 ## Reference

@@ -38,10 +38,10 @@ message = DIDComm::Message.new(
 # Alice needs the old identity's secret (to sign from_prior)
 # and the new identity's secret (to encrypt the message).
 alice_config = DIDComm::ResolversConfig.new(
-  did_resolver: DIDComm::DIDResolverInMemory.new([
+  did_resolver: DID::ResolverInMemory.new([
     alice_old[:did_doc], alice_new[:did_doc], bob[:did_doc]
   ]),
-  secrets_resolver: DIDComm::SecretsResolverInMemory.new(
+  secrets_resolver: DID::SecretsResolverInMemory.new(
     alice_old[:secrets] + alice_new[:secrets]
   )
 )
@@ -62,10 +62,10 @@ puts
 # ── Bob unpacks and sees the DID rotation ────────────────────────────────
 
 bob_config = DIDComm::ResolversConfig.new(
-  did_resolver: DIDComm::DIDResolverInMemory.new([
+  did_resolver: DID::ResolverInMemory.new([
     alice_old[:did_doc], alice_new[:did_doc], bob[:did_doc]
   ]),
-  secrets_resolver: DIDComm::SecretsResolverInMemory.new(bob[:secrets])
+  secrets_resolver: DID::SecretsResolverInMemory.new(bob[:secrets])
 )
 
 unpack_result = DIDComm.unpack(pack_result.packed_msg, resolvers_config: bob_config)

@@ -26,8 +26,8 @@ message = DIDComm::Message.new(
 )
 
 config = DIDComm::ResolversConfig.new(
-  did_resolver:     DIDComm::DIDResolverInMemory.new([alice[:did_doc], bob[:did_doc]]),
-  secrets_resolver: DIDComm::SecretsResolverInMemory.new([])
+  did_resolver:     DID::ResolverInMemory.new([alice[:did_doc], bob[:did_doc]]),
+  secrets_resolver: DID::SecretsResolverInMemory.new([])
 )
 
 result = DIDComm.pack_plaintext(message, resolvers_config: config)

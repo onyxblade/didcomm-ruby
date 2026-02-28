@@ -28,8 +28,8 @@ message = DIDComm::Message.new(
 )
 
 alice_config = DIDComm::ResolversConfig.new(
-  did_resolver:     DIDComm::DIDResolverInMemory.new([alice[:did_doc], bob[:did_doc]]),
-  secrets_resolver: DIDComm::SecretsResolverInMemory.new(alice[:secrets])
+  did_resolver:     DID::ResolverInMemory.new([alice[:did_doc], bob[:did_doc]]),
+  secrets_resolver: DID::SecretsResolverInMemory.new(alice[:secrets])
 )
 
 # Providing `from:` triggers ECDH-1PU (authcrypt) instead of ECDH-ES (anoncrypt).
@@ -49,8 +49,8 @@ puts
 # ── Bob unpacks ──────────────────────────────────────────────────────────
 
 bob_config = DIDComm::ResolversConfig.new(
-  did_resolver:     DIDComm::DIDResolverInMemory.new([alice[:did_doc], bob[:did_doc]]),
-  secrets_resolver: DIDComm::SecretsResolverInMemory.new(bob[:secrets])
+  did_resolver:     DID::ResolverInMemory.new([alice[:did_doc], bob[:did_doc]]),
+  secrets_resolver: DID::SecretsResolverInMemory.new(bob[:secrets])
 )
 
 unpack_result = DIDComm.unpack(pack_result.packed_msg, resolvers_config: bob_config)

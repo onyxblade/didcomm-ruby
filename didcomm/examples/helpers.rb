@@ -31,27 +31,27 @@ def build_x25519_identity(private_key)
   jwk_pub  = { "kty" => "OKP", "crv" => "X25519", "x" => b64u(public_key.to_bytes) }
   jwk_priv = jwk_pub.merge("d" => b64u(private_key.to_bytes))
 
-  did_doc = DIDComm::DIDDoc.new(
+  did_doc = DID::Document.new(
     id: did,
     authentication: [],
     key_agreement: [kid],
     verification_method: [
-      DIDComm::VerificationMethod.new(
+      DID::VerificationMethod.new(
         id: kid, controller: did,
-        type: DIDComm::VerificationMethodType::JSON_WEB_KEY_2020,
-        verification_material: DIDComm::VerificationMaterial.new(
-          format: DIDComm::VerificationMaterialFormat::JWK, value: jwk_pub
+        type: DID::VerificationMethodType::JSON_WEB_KEY_2020,
+        verification_material: DID::VerificationMaterial.new(
+          format: DID::VerificationMaterialFormat::JWK, value: jwk_pub
         )
       )
     ],
     service: []
   )
 
-  secret = DIDComm::Secret.new(
+  secret = DID::Secret.new(
     kid: kid,
-    type: DIDComm::VerificationMethodType::JSON_WEB_KEY_2020,
-    verification_material: DIDComm::VerificationMaterial.new(
-      format: DIDComm::VerificationMaterialFormat::JWK, value: jwk_priv
+    type: DID::VerificationMethodType::JSON_WEB_KEY_2020,
+    verification_material: DID::VerificationMaterial.new(
+      format: DID::VerificationMaterialFormat::JWK, value: jwk_priv
     )
   )
 
@@ -81,23 +81,23 @@ def build_full_identity(ed25519_seed: nil)
   x_jwk_pub  = { "kty" => "OKP", "crv" => "X25519", "x" => b64u(x_public.to_bytes) }
   x_jwk_priv = x_jwk_pub.merge("d" => b64u(x_private.to_bytes))
 
-  did_doc = DIDComm::DIDDoc.new(
+  did_doc = DID::Document.new(
     id: did,
     authentication: [ed_kid],
     key_agreement: [x_kid],
     verification_method: [
-      DIDComm::VerificationMethod.new(
+      DID::VerificationMethod.new(
         id: ed_kid, controller: did,
-        type: DIDComm::VerificationMethodType::JSON_WEB_KEY_2020,
-        verification_material: DIDComm::VerificationMaterial.new(
-          format: DIDComm::VerificationMaterialFormat::JWK, value: ed_jwk_pub
+        type: DID::VerificationMethodType::JSON_WEB_KEY_2020,
+        verification_material: DID::VerificationMaterial.new(
+          format: DID::VerificationMaterialFormat::JWK, value: ed_jwk_pub
         )
       ),
-      DIDComm::VerificationMethod.new(
+      DID::VerificationMethod.new(
         id: x_kid, controller: did,
-        type: DIDComm::VerificationMethodType::JSON_WEB_KEY_2020,
-        verification_material: DIDComm::VerificationMaterial.new(
-          format: DIDComm::VerificationMaterialFormat::JWK, value: x_jwk_pub
+        type: DID::VerificationMethodType::JSON_WEB_KEY_2020,
+        verification_material: DID::VerificationMaterial.new(
+          format: DID::VerificationMaterialFormat::JWK, value: x_jwk_pub
         )
       )
     ],
@@ -105,18 +105,18 @@ def build_full_identity(ed25519_seed: nil)
   )
 
   secrets = [
-    DIDComm::Secret.new(
+    DID::Secret.new(
       kid: ed_kid,
-      type: DIDComm::VerificationMethodType::JSON_WEB_KEY_2020,
-      verification_material: DIDComm::VerificationMaterial.new(
-        format: DIDComm::VerificationMaterialFormat::JWK, value: ed_jwk_priv
+      type: DID::VerificationMethodType::JSON_WEB_KEY_2020,
+      verification_material: DID::VerificationMaterial.new(
+        format: DID::VerificationMaterialFormat::JWK, value: ed_jwk_priv
       )
     ),
-    DIDComm::Secret.new(
+    DID::Secret.new(
       kid: x_kid,
-      type: DIDComm::VerificationMethodType::JSON_WEB_KEY_2020,
-      verification_material: DIDComm::VerificationMaterial.new(
-        format: DIDComm::VerificationMaterialFormat::JWK, value: x_jwk_priv
+      type: DID::VerificationMethodType::JSON_WEB_KEY_2020,
+      verification_material: DID::VerificationMaterial.new(
+        format: DID::VerificationMaterialFormat::JWK, value: x_jwk_priv
       )
     )
   ]
