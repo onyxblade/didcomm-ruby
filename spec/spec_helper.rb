@@ -1,9 +1,7 @@
 # frozen_string_literal: true
 
-require "didcomm"
+require "didwell"
 require "json"
-
-Dir[File.join(__dir__, "test_vectors/**/*.rb")].each { |f| require f }
 
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative "../spec_helper"
+require_relative "didcomm_helper"
 
 RSpec.describe DIDComm::Message do
   describe "#to_hash" do

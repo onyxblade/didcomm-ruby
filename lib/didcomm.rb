@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "did"
+require_relative "did"
 
 require_relative "didcomm/version"
 require_relative "didcomm/error"

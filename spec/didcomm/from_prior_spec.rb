@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative "../spec_helper"
+require_relative "didcomm_helper"
 
 RSpec.describe "FromPrior" do
   let(:resolvers_alice) { TestVectors.resolvers_config_alice }

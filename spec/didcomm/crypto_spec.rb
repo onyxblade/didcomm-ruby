@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative "../spec_helper"
+require_relative "didcomm_helper"
 
 RSpec.describe "Crypto primitives" do
   describe DIDComm::Crypto::KeyWrap do

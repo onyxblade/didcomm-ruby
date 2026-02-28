@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative "../spec_helper"
+require_relative "didcomm_helper"
 
 RSpec.describe "enc algorithm validation" do
   def build_protected(header_hash)

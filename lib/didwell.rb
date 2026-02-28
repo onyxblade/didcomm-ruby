@@ -1,5 +1,5 @@
 # frozen_string_literal: true
 
 require_relative "didwell/version"
-require "did"
-require "didcomm"
+require_relative "did"
+require_relative "didcomm"
