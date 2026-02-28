@@ -32,7 +32,7 @@ result = DIDComm.pack_encrypted(message, to: recipient_did, from: sender_did,
                                 resolvers_config: config)
 
 # Unpack a received message
-unpack = DIDComm.unpack(packed_msg, resolvers_config: config)
+unpack = DIDComm.unpack(result.packed_msg, resolvers_config: config)
 ```
 
 ## Reference
