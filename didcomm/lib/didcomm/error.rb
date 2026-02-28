@@ -5,24 +5,6 @@ module DIDComm
 
   class ValueError < Error; end
 
-  class DIDDocNotResolvedError < Error
-    def initialize(did)
-      super("DID `#{did}` is not found in DID resolver")
-    end
-  end
-
-  class DIDUrlNotFoundError < Error; end
-
-  class SecretNotFoundError < Error; end
-
-  class IncompatibleCryptoError < Error
-    def initialize(msg = nil)
-      super(msg || "Sender and recipient keys corresponding to provided parameters are incompatible to each other")
-    end
-  end
-
-  class InvalidDIDDocError < ValueError; end
-
   class MalformedMessageError < Error
     attr_reader :code
 

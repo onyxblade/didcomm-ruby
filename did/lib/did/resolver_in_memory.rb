@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-module DIDComm
-  class DIDResolverInMemory
-    include DIDResolver
+module DID
+  class ResolverInMemory
+    include Resolver
 
     def initialize(did_docs)
       @did_docs = {}

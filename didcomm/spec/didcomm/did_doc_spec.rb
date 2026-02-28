@@ -67,7 +67,7 @@ RSpec.describe DIDComm::SecretsResolverInMemory do
   end
 end
 
-RSpec.describe "DIDDoc#get_didcomm_service accept filter" do
+RSpec.describe DIDComm::DIDCommService, ".find_in" do
   it "returns service with empty accept list" do
     doc = DIDComm::DIDDoc.new(
       id: "did:example:test",
@@ -75,7 +75,7 @@ RSpec.describe "DIDDoc#get_didcomm_service accept filter" do
         DIDComm::DIDCommService.new(id: "svc-1", service_endpoint: "http://example.com", accept: [])
       ]
     )
-    expect(doc.get_didcomm_service).not_to be_nil
+    expect(DIDComm::DIDCommService.find_in(doc)).not_to be_nil
   end
 
   it "returns service that accepts didcomm/v2" do
@@ -85,7 +85,7 @@ RSpec.describe "DIDDoc#get_didcomm_service accept filter" do
         DIDComm::DIDCommService.new(id: "svc-1", service_endpoint: "http://example.com", accept: ["didcomm/v2"])
       ]
     )
-    expect(doc.get_didcomm_service).not_to be_nil
+    expect(DIDComm::DIDCommService.find_in(doc)).not_to be_nil
   end
 
   it "rejects service that only accepts didcomm/v1" do
@@ -95,7 +95,7 @@ RSpec.describe "DIDDoc#get_didcomm_service accept filter" do
         DIDComm::DIDCommService.new(id: "svc-1", service_endpoint: "http://example.com", accept: ["didcomm/v1"])
       ]
     )
-    expect(doc.get_didcomm_service).to be_nil
+    expect(DIDComm::DIDCommService.find_in(doc)).to be_nil
   end
 
   it "picks the first compatible service" do
@@ -106,7 +106,19 @@ RSpec.describe "DIDDoc#get_didcomm_service accept filter" do
         DIDComm::DIDCommService.new(id: "svc-v2", service_endpoint: "http://v2.example.com", accept: ["didcomm/v2"])
       ]
     )
-    svc = doc.get_didcomm_service
+    svc = DIDComm::DIDCommService.find_in(doc)
     expect(svc.id).to eq("svc-v2")
+  end
+
+  it "finds by service_id" do
+    doc = DIDComm::DIDDoc.new(
+      id: "did:example:test",
+      service: [
+        DIDComm::DIDCommService.new(id: "svc-1", service_endpoint: "http://example.com"),
+        DIDComm::DIDCommService.new(id: "svc-2", service_endpoint: "http://other.com")
+      ]
+    )
+    svc = DIDComm::DIDCommService.find_in(doc, "svc-2")
+    expect(svc.id).to eq("svc-2")
   end
 end

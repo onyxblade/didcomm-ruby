@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "did"
+
 require_relative "didcomm/version"
 require_relative "didcomm/error"
 require_relative "didcomm/types"
@@ -10,18 +12,10 @@ require_relative "didcomm/attachment"
 require_relative "didcomm/from_prior"
 require_relative "didcomm/message"
 
-# DID Doc
-require_relative "didcomm/did_doc/did_doc"
-require_relative "didcomm/did_doc/did_resolver"
-require_relative "didcomm/did_doc/did_resolver_in_memory"
-
-# Secrets
-require_relative "didcomm/secrets/secret"
-require_relative "didcomm/secrets/secrets_resolver"
-require_relative "didcomm/secrets/secrets_resolver_in_memory"
+# DIDComm Service
+require_relative "didcomm/didcomm_service"
 
 # Utilities
-require_relative "didcomm/utils/did"
 require_relative "didcomm/utils/multicodec"
 
 # Crypto primitives
@@ -58,4 +52,21 @@ require_relative "didcomm/pack_encrypted"
 require_relative "didcomm/unpack"
 
 module DIDComm
+  # Aliases for DID types — zero changes needed in internal code
+  DIDDoc = DID::Document
+  VerificationMethod = DID::VerificationMethod
+  DIDResolver = DID::Resolver
+  DIDResolverInMemory = DID::ResolverInMemory
+  Secret = DID::Secret
+  SecretsResolver = DID::SecretsResolver
+  SecretsResolverInMemory = DID::SecretsResolverInMemory
+  VerificationMethodType = DID::VerificationMethodType
+  VerificationMaterialFormat = DID::VerificationMaterialFormat
+  VerificationMaterial = DID::VerificationMaterial
+  DIDUtils = DID::Utils
+  DIDDocNotResolvedError = DID::DocumentNotResolvedError
+  DIDUrlNotFoundError = DID::UrlNotFoundError
+  SecretNotFoundError = DID::SecretNotFoundError
+  IncompatibleCryptoError = DID::IncompatibleCryptoError
+  InvalidDIDDocError = DID::InvalidDocumentError
 end

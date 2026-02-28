@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-module DIDComm
-  module DIDUtils
+module DID
+  module Utils
     # W3C DID grammar (https://www.w3.org/TR/did-1.1/#did-syntax):
     #   did                = "did:" method-name ":" method-specific-id
     #   method-specific-id = *( *idchar ":" ) 1*idchar

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module DIDComm
+module DID
   class SecretsResolverInMemory
     include SecretsResolver
 

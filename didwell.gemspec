@@ -12,8 +12,8 @@ Gem::Specification.new do |spec|
   spec.license = "MIT"
   spec.required_ruby_version = ">= 4.0"
 
-  spec.files = Dir["lib/**/*.rb", "didcomm/lib/**/*.rb"]
-  spec.require_paths = ["lib", "didcomm/lib"]
+  spec.files = Dir["lib/**/*.rb", "did/lib/**/*.rb", "didcomm/lib/**/*.rb"]
+  spec.require_paths = ["lib", "did/lib", "didcomm/lib"]
 
   spec.add_dependency "rbnacl", "~> 7.1"
   spec.add_dependency "base58", "~> 0.2"

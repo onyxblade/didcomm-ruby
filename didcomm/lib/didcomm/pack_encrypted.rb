@@ -95,7 +95,7 @@ module DIDComm
     did_doc = resolvers_config.did_resolver.resolve(did)
     return nil unless did_doc
 
-    service = did_doc.get_didcomm_service
+    service = DIDCommService.find_in(did_doc)
     return nil unless service
 
     routing_keys = service.routing_keys

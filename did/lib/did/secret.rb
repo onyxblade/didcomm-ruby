@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module DIDComm
+module DID
   class Secret
     attr_accessor :kid, :type, :verification_material
 

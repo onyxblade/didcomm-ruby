@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module DIDComm
+module DID
   module SecretsResolver
     def get_key(kid)
       raise NotImplementedError, "#{self.class}#get_key must be implemented"
