@@ -2,12 +2,19 @@
 
 module DID
   class Document
-    attr_accessor :id, :authentication, :key_agreement, :verification_method, :service
+    attr_accessor :id, :authentication, :key_agreement, :assertion_method,
+                  :capability_invocation, :capability_delegation,
+                  :verification_method, :service
 
-    def initialize(id:, authentication: [], key_agreement: [], verification_method: [], service: [])
+    def initialize(id:, authentication: [], key_agreement: [], assertion_method: [],
+                   capability_invocation: [], capability_delegation: [],
+                   verification_method: [], service: [])
       @id = id
       @authentication = authentication || []
       @key_agreement = key_agreement || []
+      @assertion_method = assertion_method || []
+      @capability_invocation = capability_invocation || []
+      @capability_delegation = capability_delegation || []
       @verification_method = verification_method || []
       @service = service || []
     end

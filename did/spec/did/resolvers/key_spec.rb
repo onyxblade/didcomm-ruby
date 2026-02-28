@@ -63,6 +63,15 @@ RSpec.describe DID::Resolvers::Key do
         x_kid = doc.key_agreement.first
         expect(x_kid).to start_with("#{did}#z6LS")
       end
+
+      it "populates assertionMethod, capabilityInvocation, and capabilityDelegation" do
+        doc = resolver.resolve(did)
+        ed_kid = doc.authentication.first
+
+        expect(doc.assertion_method).to eq([ed_kid])
+        expect(doc.capability_invocation).to eq([ed_kid])
+        expect(doc.capability_delegation).to eq([ed_kid])
+      end
     end
 
     context "with an X25519 did:key" do
@@ -76,9 +85,12 @@ RSpec.describe DID::Resolvers::Key do
         expect(doc.id).to eq(did)
       end
 
-      it "has a key agreement method but no authentication" do
+      it "has a key agreement method but no authentication or signing relationships" do
         doc = resolver.resolve(did)
         expect(doc.authentication).to be_empty
+        expect(doc.assertion_method).to be_empty
+        expect(doc.capability_invocation).to be_empty
+        expect(doc.capability_delegation).to be_empty
         expect(doc.key_agreement).not_to be_empty
         expect(doc.key_agreement_methods.size).to eq(1)
 
@@ -106,9 +118,30 @@ RSpec.describe DID::Resolvers::Key do
       end
     end
 
+    context "with versioned did:key syntax" do
+      let(:seed) { "\x9d\x61\xb1\x9d\xef\xfd\x5a\x60\xba\x84\x4a\xf4\x92\xec\x2c\xc4\x44\x49\xc5\x69\x7b\x32\x69\x19\x70\x3b\xac\x03\x1c\xae\x7f\x60".b }
+      let(:verify_key) { RbNaCl::Signatures::Ed25519::SigningKey.new(seed).verify_key }
+      let(:mb_value) { "z" + Base58.binary_to_base58("\xED\x01".b + verify_key.to_bytes, :bitcoin) }
+
+      it "resolves did:key:1:<mb-value> (version 1)" do
+        did = "did:key:1:#{mb_value}"
+        doc = resolver.resolve(did)
+        expect(doc).to be_a(DID::Document)
+        expect(doc.id).to eq(did)
+      end
+
+      it "raises InvalidDocumentError for unsupported versions" do
+        expect { resolver.resolve("did:key:2:#{mb_value}") }.to raise_error(DID::InvalidDocumentError, /version/)
+      end
+    end
+
     context "with invalid did:key values" do
       it "raises InvalidDocumentError for non-multibase encoding" do
         expect { resolver.resolve("did:key:abc123") }.to raise_error(DID::InvalidDocumentError, /base58btc/)
+      end
+
+      it "raises InvalidDocumentError for invalid base58 characters" do
+        expect { resolver.resolve("did:key:z!!!") }.to raise_error(DID::InvalidDocumentError, /Invalid base58btc/)
       end
 
       it "raises InvalidDocumentError for truncated data" do
@@ -116,14 +149,12 @@ RSpec.describe DID::Resolvers::Key do
       end
 
       it "raises InvalidDocumentError for unsupported multicodec" do
-        # 0x00 0x01 + 32 bytes — multicodec 0x00 is not supported
         bogus = "\x00\x01".b + ("\x00".b * 32)
         did = "did:key:z" + Base58.binary_to_base58(bogus, :bitcoin)
         expect { resolver.resolve(did) }.to raise_error(DID::InvalidDocumentError, /Unsupported multicodec/)
       end
 
       it "raises InvalidDocumentError for wrong key length" do
-        # Ed25519 multicodec prefix but only 16 bytes of key data
         bad = "\xED\x01".b + ("\x00".b * 16)
         did = "did:key:z" + Base58.binary_to_base58(bad, :bitcoin)
         expect { resolver.resolve(did) }.to raise_error(DID::InvalidDocumentError, /32 bytes/)

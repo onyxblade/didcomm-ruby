@@ -15,10 +15,14 @@ module DID
       def resolve(did)
         return nil unless did.start_with?("did:key:")
 
-        multibase_value = did.delete_prefix("did:key:")
+        multibase_value = extract_multibase(did)
         raise InvalidDocumentError, "Only base58btc multibase (z prefix) is supported" unless multibase_value.start_with?("z")
 
-        raw = Base58.base58_to_binary(multibase_value[1..], :bitcoin)
+        raw = begin
+          Base58.base58_to_binary(multibase_value[1..], :bitcoin)
+        rescue ArgumentError => e
+          raise InvalidDocumentError, "Invalid base58btc encoding: #{e.message}"
+        end
         raise InvalidDocumentError, "Multibase value too short" if raw.bytesize < 3
 
         codec, key_bytes = decode_varint(raw)
@@ -36,6 +40,21 @@ module DID
       end
 
       private
+
+      # Parse did:key:<mb-value> or did:key:<version>:<mb-value>
+      # Per spec, if only 3 components exist version defaults to "1".
+      def extract_multibase(did)
+        parts = did.split(":")
+        case parts.length
+        when 3 # did:key:<mb-value>
+          parts[2]
+        when 4 # did:key:<version>:<mb-value>
+          raise InvalidDocumentError, "Unsupported did:key version: #{parts[2]}" unless parts[2] == "1"
+          parts[3]
+        else
+          raise InvalidDocumentError, "Malformed did:key identifier"
+        end
+      end
 
       def decode_varint(bytes)
         if bytes[0].ord < 0x80
@@ -73,6 +92,9 @@ module DID
         Document.new(
           id: did,
           authentication: [ed_kid],
+          assertion_method: [ed_kid],
+          capability_invocation: [ed_kid],
+          capability_delegation: [ed_kid],
           key_agreement: [x_kid],
           verification_method: [
             VerificationMethod.new(
