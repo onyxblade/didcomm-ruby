@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    didwell (0.1.0)
+    did_rain (0.1.0)
       base58 (~> 0.2)
       base64 (>= 0.2)
       rbnacl (~> 7.1)
@@ -48,7 +48,6 @@ PLATFORMS
   arm-linux-gnu
   arm-linux-musl
   arm64-darwin
-  ruby
   x86-linux-gnu
   x86-linux-musl
   x86_64-darwin
@@ -56,14 +55,14 @@ PLATFORMS
   x86_64-linux-musl
 
 DEPENDENCIES
-  didwell!
+  did_rain!
   rake (~> 13.0)
   rspec (~> 3.12)
 
 CHECKSUMS
   base58 (0.2.3) sha256=fda5c5d3bda8b429ad0d1a5309c2d1e488ba46f0a2ab99a639890f26c61bf3be
   base64 (0.3.0) sha256=27337aeabad6ffae05c265c450490628ef3ebd4b67be58257393227588f5a97b
-  didwell (0.1.0)
+  did_rain (0.1.0)
   diff-lcs (1.6.2) sha256=9ae0d2cba7d4df3075fe8cd8602a8604993efc0dfa934cff568969efb1909962
   ffi (1.17.3) sha256=0e9f39f7bb3934f77ad6feab49662be77e87eedcdeb2a3f5c0234c2938563d4c
   ffi (1.17.3-aarch64-linux-gnu) sha256=28ad573df26560f0aedd8a90c3371279a0b2bd0b4e834b16a2baa10bd7a97068

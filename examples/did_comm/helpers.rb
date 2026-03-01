@@ -2,7 +2,8 @@
 
 # Shared helpers for DIDComm examples.
 
-require "didwell"
+require "did_rain"
+include DIDRain
 require "rbnacl"
 require "securerandom"
 require "base64"
