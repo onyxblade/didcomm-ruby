@@ -5,7 +5,7 @@ require "json"
 module DIDRain
   module DIDComm
     module PackPlaintext
-      Result = Struct.new(:packed_msg, :from_prior_issuer_kid, keyword_init: true)
+      Result = Data.define(:packed_msg, :from_prior_issuer_kid)
 
       def self.call(message, resolvers_config:)
         msg_hash = message.is_a?(Message) ? message.to_hash : message

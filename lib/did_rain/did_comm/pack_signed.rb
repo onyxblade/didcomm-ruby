@@ -5,7 +5,7 @@ require "json"
 module DIDRain
   module DIDComm
     module PackSigned
-      Result = Struct.new(:packed_msg, :sign_from_kid, :from_prior_issuer_kid, keyword_init: true)
+      Result = Data.define(:packed_msg, :sign_from_kid, :from_prior_issuer_kid)
 
       def self.call(message, sign_from:, resolvers_config:)
         raise ValueError, "'sign_from' is not a valid DID or DID URL" unless DID::Utils.is_did(sign_from)

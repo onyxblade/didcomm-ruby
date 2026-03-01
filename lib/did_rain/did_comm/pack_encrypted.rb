@@ -5,10 +5,10 @@ require "json"
 module DIDRain
   module DIDComm
     module PackEncrypted
-      Result = Struct.new(:packed_msg, :to_kids, :from_kid, :sign_from_kid,
-                          :from_prior_issuer_kid, :service_metadata, keyword_init: true)
+      Result = Data.define(:packed_msg, :to_kids, :from_kid, :sign_from_kid,
+                          :from_prior_issuer_kid, :service_metadata)
 
-      Config = Struct.new(:enc_alg_auth, :enc_alg_anon, :protect_sender_id, :forward, keyword_init: true) do
+      Config = Data.define(:enc_alg_auth, :enc_alg_anon, :protect_sender_id, :forward) do
         def initialize(enc_alg_auth: Defaults::DEF_ENC_ALG_AUTH,
                        enc_alg_anon: Defaults::DEF_ENC_ALG_ANON,
                        protect_sender_id: false,
@@ -17,7 +17,7 @@ module DIDRain
         end
       end
 
-      ServiceMetadata = Struct.new(:id, :service_endpoint, keyword_init: true)
+      ServiceMetadata = Data.define(:id, :service_endpoint)
 
       def self.call(message, to:, from: nil, sign_from: nil,
                     resolvers_config:, pack_config: nil)

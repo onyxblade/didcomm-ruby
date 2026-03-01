@@ -5,9 +5,9 @@ require "json"
 module DIDRain
   module DIDComm
     module Unpack
-      Result = Struct.new(:message, :metadata, keyword_init: true)
+      Result = Data.define(:message, :metadata)
 
-      Config = Struct.new(:expect_decrypt_by_all_keys, :unwrap_re_wrapping_forward, keyword_init: true) do
+      Config = Data.define(:expect_decrypt_by_all_keys, :unwrap_re_wrapping_forward) do
         def initialize(expect_decrypt_by_all_keys: false, unwrap_re_wrapping_forward: true)
           super
         end

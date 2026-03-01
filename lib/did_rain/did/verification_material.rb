@@ -2,6 +2,6 @@
 
 module DIDRain
   module DID
-    VerificationMaterial = Struct.new(:format, :value, keyword_init: true)
+    VerificationMaterial = Data.define(:format, :value)
   end
 end

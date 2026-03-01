@@ -2,6 +2,6 @@
 
 module DIDRain
   module DIDComm
-    ResolversConfig = Struct.new(:did_resolver, :secrets_resolver, keyword_init: true)
+    ResolversConfig = Data.define(:did_resolver, :secrets_resolver)
   end
 end

@@ -2,6 +2,6 @@
 
 module DIDRain
   module DIDComm
-    Algs = Struct.new(:alg, :enc, keyword_init: true)
+    Algs = Data.define(:alg, :enc)
   end
 end
