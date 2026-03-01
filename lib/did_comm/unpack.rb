@@ -87,7 +87,7 @@ module DIDComm
 
     if msg_hash["from_prior"].is_a?(String)
       metadata.from_prior_jwt = msg_hash["from_prior"]
-      from_prior_result = FromPriorModule.unpack_from_prior(msg_hash, resolvers_config)
+      from_prior_result = FromPrior.unpack(msg_hash, resolvers_config)
       metadata.from_prior_issuer_kid = from_prior_result
     end
 

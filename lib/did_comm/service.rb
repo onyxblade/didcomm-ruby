@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module DIDComm
-  class DIDCommService
+  class Service
     attr_accessor :id, :type, :service_endpoint, :routing_keys, :accept
 
     def initialize(id:, type: "DIDCommMessaging", service_endpoint:, routing_keys: [], accept: [])

@@ -44,7 +44,7 @@ RSpec.describe "FromPrior" do
       msg_hash["from_prior"] = "#{header_b64}.#{payload_b64}.#{sig_b64}"
 
       expect {
-        DIDComm::FromPriorModule.unpack_from_prior(msg_hash, resolvers_charlie)
+        DIDComm::FromPrior.unpack(msg_hash, resolvers_charlie)
       }.to raise_error(DIDComm::MalformedMessageError, /kid DID.*does not match iss/)
     end
 
@@ -63,10 +63,10 @@ RSpec.describe "FromPrior" do
 
       resolvers_charlie = TestVectors.resolvers_config_charlie
       msg_hash = msg.to_hash
-      DIDComm::FromPriorModule.pack_from_prior(msg_hash, resolvers_charlie)
+      DIDComm::FromPrior.pack(msg_hash, resolvers_charlie)
 
       resolvers_bob = TestVectors.resolvers_config_bob
-      issuer_kid = DIDComm::FromPriorModule.unpack_from_prior(msg_hash, resolvers_bob)
+      issuer_kid = DIDComm::FromPrior.unpack(msg_hash, resolvers_bob)
       expect(issuer_kid).to eq("did:example:charlie#key-1")
       expect(msg_hash["from_prior"]["iss"]).to eq("did:example:charlie")
     end
@@ -88,13 +88,13 @@ RSpec.describe "FromPrior" do
 
       # Pack plaintext - from_prior should be JWT string
       msg_hash = msg.to_hash
-      kid = DIDComm::FromPriorModule.pack_from_prior(msg_hash, resolvers_charlie)
+      kid = DIDComm::FromPrior.pack(msg_hash, resolvers_charlie)
       expect(kid).to eq("did:example:charlie#key-1")
       expect(msg_hash["from_prior"]).to be_a(String)
       expect(msg_hash["from_prior"].split(".").length).to eq(3)
 
       # Unpack
-      issuer_kid = DIDComm::FromPriorModule.unpack_from_prior(msg_hash, resolvers_bob)
+      issuer_kid = DIDComm::FromPrior.unpack(msg_hash, resolvers_bob)
       expect(issuer_kid).to eq("did:example:charlie#key-1")
       expect(msg_hash["from_prior"]).to be_a(Hash)
       expect(msg_hash["from_prior"]["iss"]).to eq("did:example:charlie")

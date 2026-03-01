@@ -11,7 +11,7 @@ module DIDComm
     msg_hash = message.is_a?(Message) ? message.to_hash : message
 
     # from_prior packing
-    from_prior_issuer_kid = FromPriorModule.pack_from_prior(msg_hash, resolvers_config)
+    from_prior_issuer_kid = FromPrior.pack(msg_hash, resolvers_config)
 
     sign_result = Crypto::Sign.pack(msg_hash, sign_from, resolvers_config)
 

@@ -198,7 +198,7 @@ RSpec.describe "Input validation" do
         "from_prior" => { "iss" => "not-a-did", "sub" => "did:example:alice" }
       }
       expect {
-        DIDComm::FromPriorModule.pack_from_prior(msg_hash, resolvers_charlie)
+        DIDComm::FromPrior.pack(msg_hash, resolvers_charlie)
       }.to raise_error(DIDComm::ValueError, /iss is not a valid DID/)
     end
 
@@ -208,7 +208,7 @@ RSpec.describe "Input validation" do
         "from_prior" => { "iss" => "did:example:charlie#key-1", "sub" => "did:example:alice" }
       }
       expect {
-        DIDComm::FromPriorModule.pack_from_prior(msg_hash, resolvers_charlie)
+        DIDComm::FromPrior.pack(msg_hash, resolvers_charlie)
       }.to raise_error(DIDComm::ValueError, /iss must be a DID, not a DID URL/)
     end
 
@@ -218,7 +218,7 @@ RSpec.describe "Input validation" do
         "from_prior" => { "iss" => "did:example:charlie", "sub" => "did:example:alice#key-1" }
       }
       expect {
-        DIDComm::FromPriorModule.pack_from_prior(msg_hash, resolvers_charlie)
+        DIDComm::FromPrior.pack(msg_hash, resolvers_charlie)
       }.to raise_error(DIDComm::ValueError, /sub must be a DID, not a DID URL/)
     end
 
@@ -228,7 +228,7 @@ RSpec.describe "Input validation" do
         "from_prior" => { "iss" => "did:example:charlie", "sub" => "not-a-did" }
       }
       expect {
-        DIDComm::FromPriorModule.pack_from_prior(msg_hash, resolvers_charlie)
+        DIDComm::FromPrior.pack(msg_hash, resolvers_charlie)
       }.to raise_error(DIDComm::ValueError, /sub is not a valid DID/)
     end
 
@@ -238,7 +238,7 @@ RSpec.describe "Input validation" do
         "from_prior" => { "iss" => "did:example:charlie", "sub" => "did:example:alice" }
       }
       expect {
-        DIDComm::FromPriorModule.pack_from_prior(msg_hash, resolvers_charlie,
+        DIDComm::FromPrior.pack(msg_hash, resolvers_charlie,
                                                   issuer_kid: "did:example:alice#key-1")
       }.to raise_error(DIDComm::ValueError, /issuer_kid does not belong/)
     end
@@ -249,7 +249,7 @@ RSpec.describe "Input validation" do
         "from_prior" => { "iss" => "did:example:charlie", "sub" => "did:example:charlie" }
       }
       expect {
-        DIDComm::FromPriorModule.pack_from_prior(msg_hash, resolvers_charlie)
+        DIDComm::FromPrior.pack(msg_hash, resolvers_charlie)
       }.to raise_error(DIDComm::ValueError, /must differ/)
     end
 
@@ -268,7 +268,7 @@ RSpec.describe "Input validation" do
         }
 
         expect {
-          DIDComm::FromPriorModule.unpack_from_prior(msg_hash, resolvers_charlie)
+          DIDComm::FromPrior.unpack(msg_hash, resolvers_charlie)
         }.to raise_error(DIDComm::MalformedMessageError, /typ is not JWT/)
       end
 
@@ -285,7 +285,7 @@ RSpec.describe "Input validation" do
         }
 
         expect {
-          DIDComm::FromPriorModule.unpack_from_prior(msg_hash, resolvers_charlie)
+          DIDComm::FromPrior.unpack(msg_hash, resolvers_charlie)
         }.to raise_error(DIDComm::MalformedMessageError, /kid is not a valid DID URL/)
       end
     end
@@ -338,7 +338,7 @@ RSpec.describe "Input validation" do
         "from_prior" => "already-a-jwt-string"
       }
       expect {
-        DIDComm::FromPriorModule.pack_from_prior(msg_hash, resolvers_alice)
+        DIDComm::FromPrior.pack(msg_hash, resolvers_alice)
       }.to raise_error(DIDComm::MalformedMessageError, /from_prior plaintext is invalid/)
     end
   end
@@ -410,7 +410,7 @@ RSpec.describe "Input validation" do
     it "raises when forward wrapping fails instead of silently skipping" do
       bob_with_bad_service = TestVectors.bob_did_doc
       bob_with_bad_service.service = [
-        DIDComm::DIDCommService.new(
+        DIDComm::Service.new(
           id: "did:example:bob#didcomm-1",
           service_endpoint: "https://mediator.example.com/inbox",
           routing_keys: ["did:example:unknown#key-1"],
@@ -435,7 +435,7 @@ RSpec.describe "Input validation" do
     it "returns service_metadata from the recipient's DID doc, not routing key's" do
       bob_with_service = TestVectors.bob_did_doc
       bob_with_service.service = [
-        DIDComm::DIDCommService.new(
+        DIDComm::Service.new(
           id: "did:example:bob#didcomm-1",
           service_endpoint: "https://bob-mediator.example.com/inbox",
           routing_keys: ["did:example:bob#key-x25519-1"],

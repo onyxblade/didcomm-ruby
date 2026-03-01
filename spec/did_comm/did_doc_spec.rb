@@ -67,46 +67,46 @@ RSpec.describe DID::SecretsResolverInMemory do
   end
 end
 
-RSpec.describe DIDComm::DIDCommService, ".find_in" do
+RSpec.describe DIDComm::Service, ".find_in" do
   it "returns service with empty accept list" do
     doc = DID::Document.new(
       id: "did:example:test",
       service: [
-        DIDComm::DIDCommService.new(id: "svc-1", service_endpoint: "http://example.com", accept: [])
+        DIDComm::Service.new(id: "svc-1", service_endpoint: "http://example.com", accept: [])
       ]
     )
-    expect(DIDComm::DIDCommService.find_in(doc)).not_to be_nil
+    expect(DIDComm::Service.find_in(doc)).not_to be_nil
   end
 
   it "returns service that accepts didcomm/v2" do
     doc = DID::Document.new(
       id: "did:example:test",
       service: [
-        DIDComm::DIDCommService.new(id: "svc-1", service_endpoint: "http://example.com", accept: ["didcomm/v2"])
+        DIDComm::Service.new(id: "svc-1", service_endpoint: "http://example.com", accept: ["didcomm/v2"])
       ]
     )
-    expect(DIDComm::DIDCommService.find_in(doc)).not_to be_nil
+    expect(DIDComm::Service.find_in(doc)).not_to be_nil
   end
 
   it "rejects service that only accepts didcomm/v1" do
     doc = DID::Document.new(
       id: "did:example:test",
       service: [
-        DIDComm::DIDCommService.new(id: "svc-1", service_endpoint: "http://example.com", accept: ["didcomm/v1"])
+        DIDComm::Service.new(id: "svc-1", service_endpoint: "http://example.com", accept: ["didcomm/v1"])
       ]
     )
-    expect(DIDComm::DIDCommService.find_in(doc)).to be_nil
+    expect(DIDComm::Service.find_in(doc)).to be_nil
   end
 
   it "picks the first compatible service" do
     doc = DID::Document.new(
       id: "did:example:test",
       service: [
-        DIDComm::DIDCommService.new(id: "svc-v1", service_endpoint: "http://v1.example.com", accept: ["didcomm/v1"]),
-        DIDComm::DIDCommService.new(id: "svc-v2", service_endpoint: "http://v2.example.com", accept: ["didcomm/v2"])
+        DIDComm::Service.new(id: "svc-v1", service_endpoint: "http://v1.example.com", accept: ["didcomm/v1"]),
+        DIDComm::Service.new(id: "svc-v2", service_endpoint: "http://v2.example.com", accept: ["didcomm/v2"])
       ]
     )
-    svc = DIDComm::DIDCommService.find_in(doc)
+    svc = DIDComm::Service.find_in(doc)
     expect(svc.id).to eq("svc-v2")
   end
 
@@ -114,11 +114,11 @@ RSpec.describe DIDComm::DIDCommService, ".find_in" do
     doc = DID::Document.new(
       id: "did:example:test",
       service: [
-        DIDComm::DIDCommService.new(id: "svc-1", service_endpoint: "http://example.com"),
-        DIDComm::DIDCommService.new(id: "svc-2", service_endpoint: "http://other.com")
+        DIDComm::Service.new(id: "svc-1", service_endpoint: "http://example.com"),
+        DIDComm::Service.new(id: "svc-2", service_endpoint: "http://other.com")
       ]
     )
-    svc = DIDComm::DIDCommService.find_in(doc, "svc-2")
+    svc = DIDComm::Service.find_in(doc, "svc-2")
     expect(svc.id).to eq("svc-2")
   end
 end

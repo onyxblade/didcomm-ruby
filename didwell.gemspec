@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative "lib/didwell/version"
+require_relative "lib/did_well/version"
 
 Gem::Specification.new do |spec|
   spec.name = "didwell"
@@ -15,6 +15,7 @@ Gem::Specification.new do |spec|
   spec.files = Dir["lib/**/*.rb"]
   spec.require_paths = ["lib"]
 
+  spec.add_dependency "zeitwerk", "~> 2.7"
   spec.add_dependency "rbnacl", "~> 7.1"
   spec.add_dependency "base58", "~> 0.2"
   spec.add_dependency "base64", ">= 0.2"
